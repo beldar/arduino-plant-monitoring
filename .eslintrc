@@ -35,24 +35,7 @@
     "no-return-assign": 0,
     "no-extend-native": 0,
     "radix": 0,
-    "no-case-declarations": 0,
-    #
-    # // ES6 Compliance and refactoring - TODO refactor code so these rules can be re-applied
-    # "vars-on-top": 0, // should use let or const
-    # "no-var": 0, // should use let or const
-    # "prefer-template": 0, // no concatonated strings
-    # "prefer-const": 0, // should use let or const
-    # "no-param-reassign": 0, // best practice we should not be re-assigning properties to params however, we do a lot
-    # "prefer-arrow-callback": 0, // in callback, remove function keyword
-    # "array-callback-return": 0, //Should be a forEach or return the map
-    # "quote-props": 0, // Object keys should not be defined as strings
-    # "default-case": 0, // Switch statements should have a default
-    # "one-var-declaration-per-line": 0, // declare variables in a list
-    # "no-unused-vars": 0, //use it or lose it!
-    # "no-mixed-spaces-and-tabs": 0, //reformat
-    # "react/jsx-no-bind": 0, // should not use bind to preserve scope in ES6
-    # "prefer-rest-params": 0, // native promise should not use impicit arguments
-    # "global-require": 0 // We should define at top of file, not require in function
+    "no-case-declarations": 0
   },
   "parserOptions": {
     "ecmaVersion": 6,
