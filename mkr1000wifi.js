@@ -1,51 +1,48 @@
-'use strict'
+'use strict';
 
-let net = require('net')
-let five = require('johnny-five')
-let firmata = require('firmata')
+const net = require( 'net' );
+const five = require( 'johnny-five' );
+const firmata = require( 'firmata' );
 
 // set options to match Firmata config for wifi
 // using mkr1000 with WiFi101
 // currently using static ip
-let options = {
-    host: '192.168.1.9',
-    port: 3030
+const options = {
+  host: '192.168.1.9',
+  port: 3030
+};
+
+
+function blinkLed( led, duration ) {
+  led.blink();
+  setTimeout( () => {
+    led.stop().off();
+  }, duration );
 }
 
+module.exports = net.connect( options, function () { // 'connect' listener
+  console.log( 'connected to server!' );
 
-function blinkLed(led, duration) {
-    led.blink()
-    setTimeout(function () {
-        led.stop().off()
-    }, duration)
-}
+  const socketClient = this;
 
-module.exports = net.connect(options, function() { //'connect' listener
-    console.log('connected to server!')
+    // we can use the socketClient instead of a serial port as our transport
+  const io = new firmata.Board( socketClient );
 
-    let socketClient = this
+  io.once( 'ready', () => {
+    console.log( 'io ready' );
+    io.isReady = true;
 
-    //we can use the socketClient instead of a serial port as our transport
-    let io = new firmata.Board(socketClient)
+    const board = new five.Board({ io, repl: true });
 
-    io.once('ready', function(){
-        console.log('io ready')
-        io.isReady = true
+    board.on( 'ready', () => {
+            // Full Johnny-Five support here
+      console.log( 'five ready' );
 
-        let board = new five.Board({io: io, repl: true})
+      const led = new five.Led( 6 );
 
-        board.on('ready', function(){
-            //Full Johnny-Five support here
-            console.log('five ready')
-
-            var led = new five.Led(6)
-
-            setInterval(function () {
-                blinkLed(led, 2000)
-            }, 4000)
-
-
-        })
-    })
-
-})
+      setInterval( () => {
+        blinkLed( led, 2000 );
+      }, 4000 );
+    });
+  });
+});

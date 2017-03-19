@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node app.js",
-    "build:css": "node-sass public/stylesheets/*.scss --output public/stylesheets"
+    "build:css": "node-sass public/stylesheets/*.scss --output public/stylesheets",
+    "eslint": "eslint --fix --ext .jsx --ext .js app.js ./lib ./public/javascripts/chart.js"
   },
   "dependencies": {
     "body-parser": "~1.13.2",
@@ -25,6 +26,11 @@
     "websocket": "^1.0.22"
   },
   "devDependencies": {
+    "eslint": "^3.18.0",
+    "eslint-config-airbnb": "^14.1.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^4.0.0",
+    "eslint-plugin-react": "^6.10.1",
     "node-sass": "^3.4.2"
   }
 }
