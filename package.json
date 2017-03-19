@@ -1,6 +1,6 @@
 {
-  "name": "mkr1000",
-  "version": "0.0.0",
+  "name": "arduino-plant-monitor",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "start": "node app.js",
