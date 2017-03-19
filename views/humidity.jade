@@ -4,11 +4,11 @@ block content
     section#main-column.dashboard
         div#sensorValues.hide
             div.sensor-values
-                div.temperature ?<span>°C</span>
-                label Temperature
+                div.humidity ?<span>%</span>
+                label Humidity
 
         div#detail-container
         div#master-container
 
 block page_scripts
-    script(src='/javascripts/tempDetailChart.js')
+    script(src='/javascripts/humidityDetailChart.js')
