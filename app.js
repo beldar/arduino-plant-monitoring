@@ -10,9 +10,12 @@ const bodyParser = require( 'body-parser' );
 const five = require( 'johnny-five' );
 // const firmata = require( 'firmata' );
 const sassMidleware = require( 'node-sass-middleware' );
+
 const DB = require( './lib/DB' );
 const SensorFactory = require( './lib/SensorFactory' );
 const ws = require( './lib/ws' );
+const Alerts = require( './lib/Alerts' );
+const config = require( './config' );
 
 const app = express();
 const httpServer = require( 'http' ).Server( app );
@@ -22,28 +25,23 @@ httpServer.listen( 3000 );
 
 const board = new five.Board();
 const sensors = [];
-const EMIT_FREQ = 1000;
-const SAVE_FREQ = 1000;
+
 const pulseLed = ( led, duration, cb ) => {
   led.blink();
   setTimeout( () => {
     led.stop().off();
-    cb();
+    if ( cb ) cb();
   }, duration );
 };
 
 board.on( 'ready', () => {
-  // full Johnny-Five support here
-  console.log( 'five ready' );
+  console.log( '⚡  Board is ready  ⚡' );
 
   // Init RethinkDB stuff
   DB.init();
 
   const led = new five.Led( 13 );
-  // pulse led to indicate the board is communicating
-  pulseLed( led, 2000, () => {
-    console.log( 'LED √' );
-  });
+  pulseLed( led, 2000 );
 
   const multi = new five.Multi({
     controller: 'BME280',
@@ -68,11 +66,14 @@ board.on( 'ready', () => {
     socket.on( 'disconnect', () => ws.emitUsersCount( io ) );
   });
 
-  // emit chart data on each interval
-  setInterval( () => ws.emitChartData( io, sensors ), EMIT_FREQ );
-
-  // save measurement to rethinkdb on each interval
-  setInterval( () => DB.saveMeasurements( sensors ), SAVE_FREQ );
+  setInterval( () => {
+    // emit chart data on each measurement
+    ws.emitChartData( io, sensors );
+    // save measurement to rethinkdb on each measurement
+    DB.saveMeasurements( sensors );
+    // parse readings for email alerts on each interval
+    Alerts.parseReading( sensors );
+  }, config.MEASUREMENT_FREQ );
 });
 
 // setting app stuff
@@ -99,6 +100,7 @@ app.use( express.static( path.join( __dirname, 'public' ) ) );
 app.get( '/', ( req, res ) => {
   DB.getTodayMeasurements( ( err, measurements ) => {
     if ( err ) console.error( err );
+
     res.render( 'index', { measurements });
   });
 });
@@ -109,7 +111,7 @@ app.get( '/humidity', ( req, res ) => res.render( 'humidity' ) );
 // API
 app.get( '/api/temps', ( req, res ) => {
   DB.getMeasurementsOf( 'temp', ( err, measurements ) => {
-    if ( err ) { console.log( err ); }
+    if ( err ) console.error( err );
 
     res.write( JSON.stringify( measurements ) );
     res.end();
@@ -118,7 +120,7 @@ app.get( '/api/temps', ( req, res ) => {
 
 app.get( '/api/light', ( req, res ) => {
   DB.getMeasurementsOf( 'light', ( err, measurements ) => {
-    if ( err ) { console.log( err ); }
+    if ( err ) console.error( err );
 
     res.write( JSON.stringify( measurements ) );
     res.end();
@@ -127,7 +129,7 @@ app.get( '/api/light', ( req, res ) => {
 
 app.get( '/api/humidity', ( req, res ) => {
   DB.getMeasurementsOf( 'humidity', ( err, measurements ) => {
-    if ( err ) { console.log( err ); }
+    if ( err ) console.error( err );
 
     res.write( JSON.stringify( measurements ) );
     res.end();

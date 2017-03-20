@@ -32,4 +32,7 @@ We now have a RethinkDB server running with our database `plant_monitoring_syste
 
 ### Wiring
 
+* SCL -> A5
+* SCA -> A4
+
 ![Wiring](plant-monitor_bb.png "Wiring")
