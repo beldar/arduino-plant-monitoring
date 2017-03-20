@@ -18,11 +18,12 @@ $( document ).ready( () => {
         humidityData = [],
         tempLimits = { min: Infinity, max: 0 },
         lightLimits = { min: Infinity, max: 0 },
-        humidityLimits = { min: Infinity, max: 0 };
+        humidityLimits = { min: Infinity, max: 0 },
+        MAX_INITIAL_POINTS = 100,
+        initialIndex = measurements.length - MAX_INITIAL_POINTS > 0 ? measurements.length - MAX_INITIAL_POINTS : 0;
 
   measurements
-  .slice( ( measurements.length - 100 || 0 ), measurements.length )
-  .forEach( ( p ) => {
+  .forEach( ( p, i ) => {
     const temp = Number( p.temp );
     const light = p.light;
     const humidity = p.humidity;
@@ -35,9 +36,9 @@ $( document ).ready( () => {
     if ( humidity < humidityLimits.min ) humidityLimits.min = humidity;
     if ( humidity > humidityLimits.max ) humidityLimits.max = humidity;
 
-    if ( temp ) tempData.push( [ date, temp ] );
-    if ( light ) lightData.push( [ date, light ] );
-    if ( humidity ) humidityData.push( [ date, humidity ] );
+    if ( temp && i > initialIndex ) tempData.push( [ date, temp ] );
+    if ( light && i > initialIndex ) lightData.push( [ date, light ] );
+    if ( humidity && i > initialIndex ) humidityData.push( [ date, humidity ] );
   });
 
   function updateUsersCount( total ) {

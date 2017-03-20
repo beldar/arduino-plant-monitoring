@@ -111,8 +111,8 @@ div#master-container {
   padding: 0;
   margin: 0; }
 
-@media screen and (max-width: 500px) {
-  div#about {
+@media (max-width: 764px) {
+  div#about h1 {
     display: none; }
   div#sensorValues {
     flex-direction: column;
@@ -125,8 +125,8 @@ div#master-container {
         margin-left: 10px;
         margin-bottom: 10px; } }
 
-@media screen and (max-height: 600px) {
-  div#about {
+@media (max-height: 600px) {
+  div#about h1 {
     display: none; }
   div#sensorValues {
     flex-direction: row;

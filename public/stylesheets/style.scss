@@ -199,8 +199,8 @@ div#master-container {
 }
 
 
-@media screen and (max-width: 500px) {
-  div#about {
+@media (max-width: 764px) {
+  div#about h1 {
     display: none;
   }
 
@@ -220,8 +220,8 @@ div#master-container {
     }
   }
 }
-@media screen and (max-height: 600px) {
-  div#about {
+@media (max-height: 600px) {
+  div#about h1 {
     display: none;
   }
 
