@@ -6,6 +6,16 @@ block content
       h1
         span Arduino UNO
         span  Plant Monitoring System
+      div#sensorValues
+        div#temperature-limits.sensor-values
+          div.temperature 0<span>°C</span>/0<span>°C</span>
+          label Temperature (min/max)
+        div#light-limits.sensor-values
+          div.light 0<span>%</span>/0<span>%</span>
+          label Light (min/max)
+        div#humidity-limits.sensor-values
+          div.humidity 0<span>%</span>/0<span>%</span>
+          label Humidity (min/max)
     div#sensorValues
       div#temperature.sensor-values(data-url='/temperature')
         div.temperature 0<span>°C</span>
@@ -23,6 +33,8 @@ block content
     div#sensorData
 
 block page_scripts
+  script.
+    var measurements=!{JSON.stringify(measurements)}
   script(src='/javascripts/chart.js')
   script.
     var url = null;

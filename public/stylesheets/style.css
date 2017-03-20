@@ -74,7 +74,7 @@ div#sensorValues {
         background-color: rgba(43, 144, 143, 0.05); }
       div#sensorValues div.sensor-values:hover#light {
         background-color: rgba(144, 238, 126, 0.05); }
-      div#sensorValues div.sensor-values:hover#moisture {
+      div#sensorValues div.sensor-values:hover#humidity {
         background-color: rgba(244, 91, 91, 0.05); }
     div#sensorValues div.sensor-values > div {
       font-size: 4em;
@@ -92,7 +92,7 @@ div#sensorValues {
       color: #90ee7e;
       transition: background-color 300ms ease-in;
       border-radius: 5px; }
-    div#sensorValues div.sensor-values div.moisture {
+    div#sensorValues div.sensor-values div.humidity {
       color: #f45b5b; }
     div#sensorValues div.sensor-values div.users {
       color: #7798BF; }
@@ -136,7 +136,3 @@ div#master-container {
       align-items: center; }
       div#sensorValues div.sensor-values > label {
         font-size: 1em; } }
-
-/* Highcharts styling for tooltip */
-.highcharts-tooltip {
-  font-size: 2em !important; }

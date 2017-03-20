@@ -1,14 +1,44 @@
+/* globals measurements */
+
 $( document ).ready( () => {
   let _series1,
       _series2,
       _series3;
 
-  const totalPoints = 100,
-        $delay = 1000,
-        $temperatureDisplay = $( 'div.sensor-values div.temperature' ),
-        $lightDisplay = $( 'div.sensor-values div.light' ),
-        $humidityDisplay = $( 'div.sensor-values div.humidity' ),
-        $users = $( '.users' );
+  const $temperatureDisplay = $( '#temperature.sensor-values div.temperature' ),
+        $lightDisplay = $( '#light.sensor-values div.light' ),
+        $humidityDisplay = $( '#humidity.sensor-values div.humidity' ),
+        $users = $( '.users' ),
+        $temperatureLimits = $( '#temperature-limits.sensor-values div.temperature' ),
+        $lightLimits = $( '#light-limits.sensor-values div.light' ),
+        $humidityLimits = $( '#humidity-limits.sensor-values div.humidity' );
+
+  const tempData = [],
+        lightData = [],
+        humidityData = [],
+        tempLimits = { min: Infinity, max: 0 },
+        lightLimits = { min: Infinity, max: 0 },
+        humidityLimits = { min: Infinity, max: 0 };
+
+  measurements
+  .slice( ( measurements.length - 100 || 0 ), measurements.length )
+  .forEach( ( p ) => {
+    const temp = Number( p.temp );
+    const light = p.light;
+    const humidity = p.humidity;
+    const date = new Date( p.date ).getTime();
+
+    if ( temp < tempLimits.min ) tempLimits.min = temp;
+    if ( temp > tempLimits.max ) tempLimits.max = temp;
+    if ( light < lightLimits.min ) lightLimits.min = light;
+    if ( light > lightLimits.max ) lightLimits.max = light;
+    if ( humidity < humidityLimits.min ) humidityLimits.min = humidity;
+    if ( humidity > humidityLimits.max ) humidityLimits.max = humidity;
+
+    if ( temp ) tempData.push( [ date, temp ] );
+    if ( light ) lightData.push( [ date, light ] );
+    if ( humidity ) humidityData.push( [ date, humidity ] );
+  });
 
   function updateUsersCount( total ) {
     $users.html( total );
@@ -26,10 +56,37 @@ $( document ).ready( () => {
     $humidityDisplay.html( `${value}<span>%</span>` );
   }
 
+  function updateTempLimits( temp ) {
+    if ( temp < tempLimits.min ) tempLimits.min = temp;
+    if ( temp > tempLimits.max ) tempLimits.max = temp;
+    $temperatureLimits.html( `${tempLimits.min}<span>°C</span>/${tempLimits.max}<span>°C</span>` );
+  }
+
+  function updateLightLimits( light ) {
+    if ( light < lightLimits.min ) lightLimits.min = light;
+    if ( light > lightLimits.max ) lightLimits.max = light;
+    $lightLimits.html( `${lightLimits.min}<span>%</span>/${lightLimits.max}<span>%</span>` );
+  }
+
+  function updateHumidityLimits( humidity ) {
+    if ( humidity < humidityLimits.min ) humidityLimits.min = humidity;
+    if ( humidity > humidityLimits.max ) humidityLimits.max = humidity;
+    $humidityLimits.html( `${humidityLimits.min}<span>%</span>/${humidityLimits.max}<span>%</span>` );
+  }
+
   function updateSensorDisplayValues( temp, light, humidity ) {
-    if ( temp ) updateTemperature( temp.value );
-    if ( light ) updateLight( light.value );
-    if ( humidity ) updateHumidity( humidity.value );
+    if ( temp ) {
+      updateTemperature( temp.value );
+      updateTempLimits( temp.value );
+    }
+    if ( light ) {
+      updateLight( light.value );
+      updateLightLimits( light.value );
+    }
+    if ( humidity ) {
+      updateHumidity( humidity.value );
+      updateHumidityLimits( humidity.value );
+    }
   }
 
   const socket = io.connect();
@@ -40,7 +97,7 @@ $( document ).ready( () => {
     const light = readings.value.find( v => v.type === 'light' );
     const humidity = readings.value.find( v => v.type === 'humidity' );
 
-    if ( temp ) _series1.addPoint( [ readings.date, temp.value ], false, true );
+    if ( temp ) _series1.addPoint( [ readings.date, Number( temp.value ) ], false, true );
     if ( light ) _series2.addPoint( [ readings.date, light.value ], false, true );
     if ( humidity ) _series3.addPoint( [ readings.date, humidity.value ], true, true );
 
@@ -141,7 +198,7 @@ $( document ).ready( () => {
     } ],
     tooltip: {
       formatter() {
-        const unitOfMeasurement = this.series.name === 'TEMPERATURE' ? '  °F' : ' %';
+        const unitOfMeasurement = this.series.name === 'TEMPERATURE' ? '  °C' : ' %';
         return `<b>${this.series.name}</b><br/>${
         Highcharts.numberFormat( this.y, 1 )}${unitOfMeasurement}`;
       }
@@ -158,51 +215,15 @@ $( document ).ready( () => {
       style: {
         color: '#2b908f'
       },
-      data: ( function () {
-        // generate an array of random data
-        const data = [],
-              time = ( new Date() ).getTime();
-
-        for ( let i = -totalPoints; i <= 0; i += 1 ) {
-          data.push({
-            x: time + ( i * $delay ),
-            y: 0
-          });
-        }
-        return data;
-      }() )
+      data: tempData
     }, {
       name : 'LIGHT',
       yAxis: 1,
-      data : ( function () {
-        // generate an array of random data
-        const data = [],
-              time = ( new Date() ).getTime();
-
-        for ( let i = -totalPoints; i <= 0; i += 1 ) {
-          data.push({
-            x: time + ( i * $delay ),
-            y: 0
-          });
-        }
-        return data;
-      }() )
+      data : lightData
     }, {
       name : 'Humidity',
       yAxis: 2,
-      data : ( function () {
-        // generate an array of random data
-        const data = [],
-              time = ( new Date() ).getTime();
-
-        for ( let i = -totalPoints; i <= 0; i += 1 ) {
-          data.push({
-            x: time + ( i * $delay ),
-            y: 0
-          });
-        }
-        return data;
-      }() )
+      data : humidityData
     } ]
   });
 });

@@ -83,6 +83,10 @@ $( document ).ready( () => {
 
   // create the master chart
   function createMaster( data ) {
+    data = data.map( ( r ) => {
+      r[ 1 ] = Number( r[ 1 ] );
+      return r;
+    });
     $( '#master-container' ).highcharts({
       chart: {
         reflow: true,

@@ -23,7 +23,7 @@ httpServer.listen( 3000 );
 const board = new five.Board();
 const sensors = [];
 const EMIT_FREQ = 1000;
-const SAVE_FREQ = 10000;
+const SAVE_FREQ = 1000;
 const pulseLed = ( led, duration, cb ) => {
   led.blink();
   setTimeout( () => {
@@ -96,7 +96,12 @@ app.use( sassMidleware({
 app.use( express.static( path.join( __dirname, 'public' ) ) );
 
 // Routes
-app.get( '/', ( req, res ) => res.render( 'index' ) );
+app.get( '/', ( req, res ) => {
+  DB.getTodayMeasurements( ( err, measurements ) => {
+    if ( err ) console.error( err );
+    res.render( 'index', { measurements });
+  });
+});
 app.get( '/temperature', ( req, res ) => res.render( 'temperature' ) );
 app.get( '/light', ( req, res ) => res.render( 'light' ) );
 app.get( '/humidity', ( req, res ) => res.render( 'humidity' ) );
