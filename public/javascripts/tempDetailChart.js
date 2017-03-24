@@ -85,6 +85,7 @@ $( document ).ready( () => {
   function createMaster( data ) {
     data = data.map( ( r ) => {
       r[ 1 ] = Number( r[ 1 ] );
+      r[ 0 ] *= 1000.0;
       return r;
     });
     $( '#master-container' ).highcharts({

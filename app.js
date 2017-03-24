@@ -6,9 +6,9 @@ const favicon = require( 'serve-favicon' );
 const logger = require( 'morgan' );
 const cookieParser = require( 'cookie-parser' );
 const bodyParser = require( 'body-parser' );
-// const net = require( 'net' );
+const net = require( 'net' );
 const five = require( 'johnny-five' );
-// const firmata = require( 'firmata' );
+const firmata = require( 'firmata' );
 const sassMidleware = require( 'node-sass-middleware' );
 
 const DB = require( './lib/DB' );
@@ -23,7 +23,6 @@ const io = require( 'socket.io' )( httpServer );
 
 httpServer.listen( 3000 );
 
-const board = new five.Board();
 const sensors = [];
 
 const pulseLed = ( led, duration, cb ) => {
@@ -34,46 +33,71 @@ const pulseLed = ( led, duration, cb ) => {
   }, duration );
 };
 
-board.on( 'ready', () => {
-  console.log( '⚡  Board is ready  ⚡' );
+// set options to match Firmata config for wifi
+// using MKR1000 with WiFi101
+const options = {
+  host: '192.168.1.113',
+  port: 3030
+};
 
-  // Init RethinkDB stuff
-  DB.init();
+net.connect( options, function () {
+  console.log( '📡  Connected to MKR1000! 📡' );
 
-  const led = new five.Led( 13 );
-  pulseLed( led, 2000 );
+  const socketClient = this;
 
-  const multi = new five.Multi({
-    controller: 'BME280',
-    address   : 0x76,
-    freq      : 250
+  // use the socketClient instead of a serial port for transport
+  const boardIo = new firmata.Board( socketClient );
+
+  boardIo.once( 'ready', () => {
+    console.log( '🔌  Connection board wired 🔌' );
+
+    boardIo.isReady = true;
+
+    const board = new five.Board({ io: boardIo, repl: false });
+    board.on( 'ready', () => {
+      console.log( '⚡  Board is ready  ⚡' );
+
+      // Init RethinkDB stuff
+      DB.init();
+
+      // const led = new five.Led( 13 );
+      // pulseLed( led, 2000 );
+
+      const multi = new five.Multi({
+        controller: 'BME280',
+        address   : 0x76,
+        freq      : 250
+      });
+
+      const lightSensor = new five.Light({
+        pin : 'A0',
+        freq: 250
+      });
+
+      sensors.push( SensorFactory.Sensor( 'temp', multi ) );
+      sensors.push( SensorFactory.Sensor( 'humidity', multi ) );
+      sensors.push( SensorFactory.Sensor( 'light', lightSensor ) );
+
+      io.on( 'connection', ( socket ) => {
+        // emit usersCount on new connection
+        ws.emitUsersCount( io );
+        // emit chart data to have initial values
+        ws.emitChartData( io, sensors );
+
+        // emit usersCount when connection is closed
+        socket.on( 'disconnect', () => ws.emitUsersCount( io ) );
+      });
+
+      setInterval( () => {
+        // emit chart data on each measurement
+        ws.emitChartData( io, sensors );
+        // save measurement to rethinkdb on each measurement
+        DB.saveMeasurements( sensors );
+        // parse readings for email alerts on each interval
+        Alerts.parseReading( sensors );
+      }, config.MEASUREMENT_FREQ );
+    });
   });
-
-  const lightSensor = new five.Light({
-    pin : 'A0',
-    freq: 250
-  });
-
-  sensors.push( SensorFactory.Sensor( 'temp', multi ) );
-  sensors.push( SensorFactory.Sensor( 'humidity', multi ) );
-  sensors.push( SensorFactory.Sensor( 'light', lightSensor ) );
-
-  io.on( 'connection', ( socket ) => {
-    // emit usersCount on new connection
-    ws.emitUsersCount( io );
-
-    // emit usersCount when connection is closed
-    socket.on( 'disconnect', () => ws.emitUsersCount( io ) );
-  });
-
-  setInterval( () => {
-    // emit chart data on each measurement
-    ws.emitChartData( io, sensors );
-    // save measurement to rethinkdb on each measurement
-    DB.saveMeasurements( sensors );
-    // parse readings for email alerts on each interval
-    Alerts.parseReading( sensors );
-  }, config.MEASUREMENT_FREQ );
 });
 
 // setting app stuff
@@ -113,7 +137,7 @@ app.get( '/api/temps', ( req, res ) => {
   DB.getMeasurementsOf( 'temp', ( err, measurements ) => {
     if ( err ) console.error( err );
 
-    res.write( JSON.stringify( measurements ) );
+    res.write( JSON.stringify( err || measurements ) );
     res.end();
   });
 });
@@ -122,7 +146,7 @@ app.get( '/api/light', ( req, res ) => {
   DB.getMeasurementsOf( 'light', ( err, measurements ) => {
     if ( err ) console.error( err );
 
-    res.write( JSON.stringify( measurements ) );
+    res.write( JSON.stringify( err || measurements ) );
     res.end();
   });
 });
@@ -131,7 +155,7 @@ app.get( '/api/humidity', ( req, res ) => {
   DB.getMeasurementsOf( 'humidity', ( err, measurements ) => {
     if ( err ) console.error( err );
 
-    res.write( JSON.stringify( measurements ) );
+    res.write( JSON.stringify( err || measurements ) );
     res.end();
   });
 });

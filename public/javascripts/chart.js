@@ -121,7 +121,7 @@ $( document ).ready( () => {
       }
     },
     tooltip: {
-      enabled: false
+      enabled: true
     }
   });
 

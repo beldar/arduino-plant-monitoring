@@ -3,9 +3,10 @@ module.exports = {
   TEMP_MAX_LIMIT    : 30,
   HUMIDITY_MIN_LIMIT: 40,
   HUMIDITY_MAX_LIMIT: 70,
+  SEND_EMAILS       : false,
   EMAIL_FREQ        : 60 * 1000, // 1min
   EMAIL_SERVICE     : 'gmail',
-  MEASUREMENT_FREQ  : 1000 // 1sec
+  MEASUREMENT_FREQ  : 60 * 1000 // 1min
 };
 
 /**
