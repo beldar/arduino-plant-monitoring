@@ -41,6 +41,10 @@ Next click the `Add table` button. Then type `measurements` and click create.
 
 We now have a RethinkDB server running with our database `plant_monitoring_system` and our table `measurements`.
 
+We only need to go to the UI, Data Explorer and run this query to create an index:
+
+```r.db('plant_monitoring_system').table('measurements').indexCreate('date')```
+
 ### 2. Installing Standard Firmata Wifi
 
 Open Arduino IDE and go to `File` --> `Examples` --> `Firmata` --> `StandardFirmataWifi`.
