@@ -13,6 +13,7 @@ Based on [https://github.com/ryanjgill/mkr1000](https://github.com/ryanjgill/mkr
 * Individual measurements charts
 * Min/Max measurements by day
 * Min/Max email alerts with configurable limits (requires Gmail account)
+* External access via [ngrok](https://ngrok.com/) tunnel
 
 ## Install
 
