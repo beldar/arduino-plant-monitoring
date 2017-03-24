@@ -9,7 +9,7 @@ const bodyParser = require( 'body-parser' );
 const net = require( 'net' );
 const five = require( 'johnny-five' );
 const firmata = require( 'firmata' );
-const sassMidleware = require( 'node-sass-middleware' );
+const ngrok = require( 'ngrok' );
 
 const DB = require( './lib/DB' );
 const SensorFactory = require( './lib/SensorFactory' );
@@ -21,7 +21,7 @@ const app = express();
 const httpServer = require( 'http' ).Server( app );
 const io = require( 'socket.io' )( httpServer );
 
-httpServer.listen( 3000 );
+httpServer.listen( config.PORT );
 
 const sensors = [];
 
@@ -96,6 +96,13 @@ net.connect( options, function () {
         // parse readings for email alerts on each interval
         Alerts.parseReading( sensors );
       }, config.MEASUREMENT_FREQ );
+
+      if ( config.NGROK_ENABLED ) {
+        ngrok.connect( config.PORT, ( err, url ) => {
+          if ( err ) return console.error( '📛 ngrok tunnel failed', err );
+          console.log( '⚡  ngrok tunnel established! ⚡', url );
+        });
+      }
     });
   });
 });
@@ -112,12 +119,6 @@ app.use( logger( 'dev' ) );
 app.use( bodyParser.json() );
 app.use( bodyParser.urlencoded({ extended: false }) );
 app.use( cookieParser() );
-app.use( sassMidleware({
-  src           : path.join( __dirname, 'public' ),
-  dest          : path.join( __dirname, 'public' ),
-  indentedSyntax: true,
-  sourceMap     : true
-}) );
 app.use( express.static( path.join( __dirname, 'public' ) ) );
 
 // Routes

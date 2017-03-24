@@ -200,8 +200,10 @@ $( document ).ready( () => {
     tooltip: {
       formatter() {
         const unitOfMeasurement = this.series.name === 'TEMPERATURE' ? '  °C' : ' %';
-        return `<b>${this.series.name}</b><br/>${
-        Highcharts.numberFormat( this.y, 1 )}${unitOfMeasurement}`;
+        const date = new Date( this.x );
+        return `<b>${this.series.name}</b>
+        <br/>${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}<br/>
+        ${Highcharts.numberFormat( this.y, 1 )}${unitOfMeasurement}`;
       }
     },
     legend: {
