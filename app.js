@@ -61,7 +61,7 @@ net.connect( options, function () {
 
     boardIo.isReady = true;
 
-    const board = new five.Board({ io: boardIo, repl: false });
+    const board = new five.Board({ io: boardIo, repl: config.REPL });
     board.on( 'ready', () => {
       console.log( '⚡  Board is ready  ⚡' );
 

@@ -1,5 +1,6 @@
 module.exports = {
   PORT              : 3000, // Application port (i.e. localhost:3000)
+  REPL              : false, // If true activates J5 board REPL
   ARDUINO_IP        : '192.168.1.113', // IP configured on your arduino's Firmata WiFi
   ARDUINO_PORT      : 3030, // Port configured on your arduino's Firmata WiFi
   TEMP_MIN_LIMIT    : 20, // Min temperature limit to send an Alert
