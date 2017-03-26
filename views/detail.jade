@@ -4,12 +4,13 @@ block content
     section#main-column.dashboard
         div#sensorValues.hide
             div.sensor-values
-                div.moisture ?<span>%</span>
-                label Moisture
+                div.{sensor.type} <span>#{sensor.unit}</span>
+                label #{sensor.label}
 
         div#detail-container
         div#master-container
 
 block page_scripts
-    script(src='/javascripts/moistureDetailChart.js')
-
+    script.
+      var sensor=!{JSON.stringify(sensor)}
+    script(src='/javascripts/DetailChart.js')

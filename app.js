@@ -24,7 +24,6 @@ const ws = require( './lib/ws' );
 const Alerts = require( './lib/Alerts' );
 const config = require( './config' );
 
-
 const app = express();
 const httpServer = require( 'http' ).Server( app );
 const io = require( 'socket.io' )( httpServer );
@@ -68,9 +67,7 @@ net.connect( options, function () {
       // Init RethinkDB stuff
       DB.init();
 
-      // const led = new five.Led( 13 );
-      // pulseLed( led, 2000 );
-
+      // Sensor initialisation
       const multi = new five.Multi({
         controller: 'BME280',
         address   : 0x76,
@@ -82,9 +79,30 @@ net.connect( options, function () {
         freq: 250
       });
 
-      sensors.push( SensorFactory.Sensor( 'temp', multi ) );
-      sensors.push( SensorFactory.Sensor( 'humidity', multi ) );
-      sensors.push( SensorFactory.Sensor( 'light', lightSensor ) );
+      // Sensor definition
+      sensors.push( SensorFactory.Sensor({
+        type  : 'temp',
+        label : 'Temperature',
+        unit  : 'ºC',
+        sensor: multi,
+        color : '#2b908f'
+      }) );
+
+      sensors.push( SensorFactory.Sensor({
+        type  : 'humidity',
+        label : 'Humidity',
+        unit  : '%',
+        sensor: multi,
+        color : '#f45b5b'
+      }) );
+
+      sensors.push( SensorFactory.Sensor({
+        type  : 'light',
+        label : 'Light Exposure',
+        unit  : '%',
+        sensor: lightSensor,
+        color : '#90ee7e'
+      }) );
 
       io.on( 'connection', ( socket ) => {
         // emit usersCount on new connection
@@ -137,31 +155,31 @@ app.get( '/', ( req, res ) => {
     res.render( 'index', { measurements });
   });
 });
-app.get( '/temperature', ( req, res ) => res.render( 'temperature' ) );
-app.get( '/light', ( req, res ) => res.render( 'light' ) );
-app.get( '/humidity', ( req, res ) => res.render( 'humidity' ) );
+
+app.get( '/detail/:type', ( req, res ) => {
+  const type = req.params.type;
+  const sensor = sensors.find( s => s.type === type );
+
+  if ( !sensor ) {
+    res.status( 404 ).send( 'Not found' );
+    return;
+  }
+
+  const sensorProps = {
+    type : sensor.type,
+    label: sensor.label,
+    unit : sensor.unit,
+    color: sensor.color
+  };
+
+  console.log( sensorProps );
+
+  res.render( 'detail', { sensor: sensorProps });
+});
 
 // API
-app.get( '/api/temps', ( req, res ) => {
-  DB.getMeasurementsOf( 'temp', ( err, measurements ) => {
-    if ( err ) console.error( err );
-
-    res.write( JSON.stringify( err || measurements ) );
-    res.end();
-  });
-});
-
-app.get( '/api/light', ( req, res ) => {
-  DB.getMeasurementsOf( 'light', ( err, measurements ) => {
-    if ( err ) console.error( err );
-
-    res.write( JSON.stringify( err || measurements ) );
-    res.end();
-  });
-});
-
-app.get( '/api/humidity', ( req, res ) => {
-  DB.getMeasurementsOf( 'humidity', ( err, measurements ) => {
+app.get( '/api/:sensor', ( req, res ) => {
+  DB.getMeasurementsOf( req.params.sensor, ( err, measurements ) => {
     if ( err ) console.error( err );
 
     res.write( JSON.stringify( err || measurements ) );

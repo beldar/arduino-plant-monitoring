@@ -1,17 +1,9 @@
+/* globals sensor */
+
+let data;
+
 $( document ).ready( () => {
-  let detailChart,
-      $users = $( '.users' )
-  ;
-
-  const socket = io.connect();
-
-  socket.on( 'usersCount', ( total ) => {
-    updateUsersCount( total.totalUsers );
-  });
-
-  function updateUsersCount( total ) {
-    $users.html( total );
-  }
+  let detailChart;
 
   // create the detail chart
   function createDetail( masterChart ) {
@@ -28,10 +20,10 @@ $( document ).ready( () => {
       },
       credits: false,
       title  : {
-        text : 'Light Data',
+        text : `${sensor.label} Data`,
         style: {
           fontSize: '3em',
-          color   : Highcharts.getOptions().colors[ 1 ]
+          color   : sensor.color
         }
       },
       subtitle: {
@@ -52,8 +44,8 @@ $( document ).ready( () => {
       tooltip: {
         formatter() {
           const point = this.points[ 0 ];
-          return `${Highcharts.dateFormat( '%A %B %e %Y', this.x )}:<br/>${
-          point.y} % Light Exposure`;
+          return `${Highcharts.dateFormat( '%A %B %e %Y %H:%M', this.x )}:<br/>${
+          point.y} ${sensor.unit} ${sensor.label}`;
         },
         style: {
           fontSize  : '1em',
@@ -79,9 +71,9 @@ $( document ).ready( () => {
         }
       },
       series: [ {
-        name : 'Light Exposure',
+        name : sensor.label,
         data : detailData,
-        color: Highcharts.getOptions().colors[ 1 ]
+        color: sensor.color
       } ],
 
       exporting: {
@@ -92,8 +84,8 @@ $( document ).ready( () => {
   }
 
   // create the master chart
-  function createMaster( data ) {
-    data = data.map( ( r ) => {
+  function createMaster( _data ) {
+    data = _data.map( ( r ) => {
       r[ 1 ] = Number( r[ 1 ] );
       r[ 0 ] *= 1000.0;
       return r;
@@ -149,7 +141,7 @@ $( document ).ready( () => {
         text : Number( data.length ).toLocaleString( 'en' ),
         style: {
           fontSize: '2em',
-          color   : Highcharts.getOptions().colors[ 1 ]
+          color   : sensor.color
         }
       },
       subtitle: {
@@ -199,7 +191,7 @@ $( document ).ready( () => {
           fillColor: {
             linearGradient: [ 0, 0, 0, 70 ],
             stops         : [
-              [ 0, Highcharts.getOptions().colors[ 1 ] ],
+              [ 0, sensor.color ],
               [ 1, 'rgba(255,255,255,0)' ]
             ]
           },
@@ -219,11 +211,11 @@ $( document ).ready( () => {
 
       series: [ {
         type         : 'area',
-        name         : 'Light Exposure',
+        name         : sensor.label,
         pointInterval: 24 * 3600 * 1000,
         pointStart   : data[ 0 ][ 0 ],
         data,
-        color        : Highcharts.getOptions().colors[ 1 ]
+        color        : sensor.color
       } ],
 
       exporting: {
@@ -236,7 +228,7 @@ $( document ).ready( () => {
     .highcharts(); // return chart instance
   }
 
-  $.get( '/api/light', ( measurements ) => {
+  $.get( `/api/${sensor.type}`, ( measurements ) => {
     data = JSON.parse( measurements );
     // create master and in its callback, create the detail chart
     createMaster( data );
