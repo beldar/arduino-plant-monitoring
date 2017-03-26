@@ -172,8 +172,6 @@ app.get( '/detail/:type', ( req, res ) => {
     color: sensor.color
   };
 
-  console.log( sensorProps );
-
   res.render( 'detail', { sensor: sensorProps });
 });
 
