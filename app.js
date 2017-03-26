@@ -36,8 +36,8 @@ const pulseLed = ( led, duration, cb ) => {
 // set options to match Firmata config for wifi
 // using MKR1000 with WiFi101
 const options = {
-  host: '192.168.1.113',
-  port: 3030
+  host: config.ARDUINO_IP,
+  port: config.ARDUINO_PORT
 };
 
 net.connect( options, function () {
@@ -74,9 +74,15 @@ net.connect( options, function () {
         freq: 250
       });
 
+      const waterLvl = new five.Sensor({
+        pin : 'A1',
+        freq: 250
+      });
+
       sensors.push( SensorFactory.Sensor( 'temp', multi ) );
       sensors.push( SensorFactory.Sensor( 'humidity', multi ) );
       sensors.push( SensorFactory.Sensor( 'light', lightSensor ) );
+      sensors.push( SensorFactory.Sensor( 'water', waterLvl ) );
 
       io.on( 'connection', ( socket ) => {
         // emit usersCount on new connection
@@ -132,6 +138,7 @@ app.get( '/', ( req, res ) => {
 app.get( '/temperature', ( req, res ) => res.render( 'temperature' ) );
 app.get( '/light', ( req, res ) => res.render( 'light' ) );
 app.get( '/humidity', ( req, res ) => res.render( 'humidity' ) );
+app.get( '/water', ( req, res ) => res.render( 'water' ) );
 
 // API
 app.get( '/api/temps', ( req, res ) => {
@@ -154,6 +161,15 @@ app.get( '/api/light', ( req, res ) => {
 
 app.get( '/api/humidity', ( req, res ) => {
   DB.getMeasurementsOf( 'humidity', ( err, measurements ) => {
+    if ( err ) console.error( err );
+
+    res.write( JSON.stringify( err || measurements ) );
+    res.end();
+  });
+});
+
+app.get( '/api/water', ( req, res ) => {
+  DB.getMeasurementsOf( 'water', ( err, measurements ) => {
     if ( err ) console.error( err );
 
     res.write( JSON.stringify( err || measurements ) );

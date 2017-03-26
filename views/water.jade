@@ -1,0 +1,14 @@
+extends layout
+
+block content
+    section#main-column.dashboard
+        div#sensorValues.hide
+            div.sensor-values
+                div.water ?<span>%</span>
+                label Water Level
+
+        div#detail-container
+        div#master-container
+
+block page_scripts
+    script(src='/javascripts/waterDetailChart.js')

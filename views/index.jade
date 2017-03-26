@@ -10,12 +10,12 @@ block content
         div#temperature-limits.sensor-values
           div.temperature 0<span>°C</span>/0<span>°C</span>
           label Temperature (min/max)
-        div#light-limits.sensor-values
-          div.light 0<span>%</span>/0<span>%</span>
-          label Light (min/max)
         div#humidity-limits.sensor-values
           div.humidity 0<span>%</span>/0<span>%</span>
           label Humidity (min/max)
+        div#water-limits.sensor-values
+          div.water 0<span>%</span>
+          label Water Level (min)
     div#sensorValues
       div#temperature.sensor-values(data-url='/temperature')
         div.temperature 0<span>°C</span>
@@ -26,6 +26,9 @@ block content
       div#humidity.sensor-values(data-url='/humidity')
         div.humidity 0<span>%</span>
         label Humidity
+      div#water.sensor-values(data-url='/water')
+        div.water 0<span>%</span>
+        label Water Level
       div#users.sensor-values
         div.users 1
         label Users

@@ -5,6 +5,7 @@ $blue: #2b908f;
 $green: #90ee7e;
 $red: #f45b5b;
 $blue-grey: #7798BF;
+$deep-blue: #5b8bf4;
 
 
 // highcharts dark theme colors
@@ -166,6 +167,10 @@ div#sensorValues {
 
     div.humidity {
       color: $red;
+    }
+
+    div.water {
+      color: $deep-blue;
     }
 
     div.users {
