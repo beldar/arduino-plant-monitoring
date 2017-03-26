@@ -1,5 +1,12 @@
 'use strict';
 
+const fs = require( 'fs' );
+
+if ( !fs.existsSync( `${__dirname}/config.js` ) ) {
+  console.error( '📛  Configuration file is missing, copy config.example.js to config.js and change it as required' );
+  process.exit( 1 );
+}
+
 const express = require( 'express' );
 const path = require( 'path' );
 const favicon = require( 'serve-favicon' );
@@ -16,6 +23,7 @@ const SensorFactory = require( './lib/SensorFactory' );
 const ws = require( './lib/ws' );
 const Alerts = require( './lib/Alerts' );
 const config = require( './config' );
+
 
 const app = express();
 const httpServer = require( 'http' ).Server( app );
@@ -36,8 +44,8 @@ const pulseLed = ( led, duration, cb ) => {
 // set options to match Firmata config for wifi
 // using MKR1000 with WiFi101
 const options = {
-  host: '192.168.1.113',
-  port: 3030
+  host: config.ARDUINO_IP,
+  port: config.ARDUINO_PORT
 };
 
 net.connect( options, function () {

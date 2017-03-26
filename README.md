@@ -25,6 +25,8 @@ You need to perform 3 major tasks in order to get the software up and running
 
 3. Install Node.js to run our express web sever for both johnny-five and the client UI.
 
+4. Create your configuration file
+
 ### 1. Installing RethinkDB
 
 Go to https://www.rethinkdb.com/docs/install/ and click the appropriate installation depending on your operating system.
@@ -41,9 +43,9 @@ Next click the `Add table` button. Then type `measurements` and click create.
 
 We now have a RethinkDB server running with our database `plant_monitoring_system` and our table `measurements`.
 
-We only need to go to the UI, Data Explorer and run this query to create an index:
+We only need to go to the UI, Data Explorer and run this query to create a date index:
 
-```r.db('plant_monitoring_system').table('measurements').indexCreate('date')```
+`r.db('plant_monitoring_system').table('measurements').indexCreate('date')`
 
 ### 2. Installing Standard Firmata Wifi
 
@@ -97,6 +99,48 @@ Once at the root of the project, we will need to install the dependencies and th
 Run `npm install`. This installs all dependencies listed in our package.json file.
 
 Once all dependencies are installed, run `npm start` to start our web server. At this point we will need to have already started our rethinkdb server as well as having the MKR1000 up and running the StandardFirmataWifi sketch and connected to your network.
+
+### 4. Create your configuration file
+
+Copy `config.example.js` from the root of this project to a new file called `config.js`.
+
+Now edit these options as needed, each is described on the file:
+
+```javascript
+module.exports = {
+  PORT              : 3000, // Application port (i.e. localhost:3000)
+  ARDUINO_IP        : '192.168.1.113', // IP configured on your arduino's Firmata WiFi
+  ARDUINO_PORT      : 3030, // Port configured on your arduino's Firmata WiFi
+  TEMP_MIN_LIMIT    : 20, // Min temperature limit to send an Alert
+  TEMP_MAX_LIMIT    : 30, // Max temperature limit to send an Alert
+  HUMIDITY_MIN_LIMIT: 40, // Min humidity limit to send an Alert
+  HUMIDITY_MAX_LIMIT: 70, // Max humidity limit to send an Alert
+  SEND_EMAILS       : false, // Set to true if you want email Alerts to be sent
+  EMAIL_FREQ        : 60 * 1000, // (1min) How often to check the limits for the Alerts
+  EMAIL_SERVICE     : 'gmail', // Which email service to use
+  MEASUREMENT_FREQ  : 60 * 1000, // (1min) How often to sample data from sensors
+  NGROK_ENABLED     : true, // Set to true if you want to automatically create an ngrok tunnel
+  RDB_DATABASE      : 'plant_monitoring_system', // Rethinkdb database name
+  RDB_HOST          : 'localhost', // Rethinkdb host name
+  RDB_TABLE         : 'measurements', // Rethinkdb table name
+  RDB_PORT          : 28015  // Rethinkdb port
+};
+```
+
+
+#### Email alerts
+
+To enable email alerts in addition to activate it on the config you need to set *3 environment variables* wherever you run this code:
+
+```bash
+EMAIL_FROM=email@gmail.com  # email from where the alerts are going to be sent
+EMAIL_FROM_PASS=password    # password for that email
+EMAIL_TOP=another@gmail.com # email to sent the alerts to
+```
+
+These are kept outside of the code for security reasons.
+
+Depending on which email service you use you may need to change `EMAIL_SERVICE` from `config.js`.
 
 ### Wiring
 
