@@ -67,10 +67,10 @@ Add you wifi ssid to the following line where it says 'your_network_name'
 
 `char ssid[] = "Wish I had Google Fiber";`
 
-Uncomment the line `// #define STATIC_IP_ADDRESS 192,168,1,113` and change the last 3 digits from `113` to `9`.
+Uncomment the line `// #define STATIC_IP_ADDRESS 192,168,1,113`
 It should look like below when done.
 
-`#define STATIC_IP_ADDRESS 192,168,1,9`
+`#define STATIC_IP_ADDRESS 192,168,1,113`
 
 Enter you wifi password where it says `your_wpa_passphrase`;
 
@@ -87,9 +87,9 @@ You are now ready to connect to the MKR1000 using the firmata protocol.
 
 ### 3. Installing Node.js
 
-Go to https://nodejs.org/en/ and click the big green button `v4.4.1 LTS`. This will download the installer for Node.js. Run the installer and follow the wizard.
+Go to https://nodejs.org/en/ and click the big green button for the LTS (Long Term Support) version. This will download the installer for Node.js. Run the installer and follow the wizard.
 
-Once installed you should be able to open up the command line and type `node -v` and it should return `v4.4.1` or whatever version you installed earlier. You should also be able to check the version of NPM with `npm -v`.
+Once installed you should be able to open up the command line and type `node -v` and it should return `v6.10.1` or whatever version you installed earlier. You should also be able to check the version of NPM with `npm -v`.
 
 We will now install the Node.js app and start communicating using Johnny-Five.
 
