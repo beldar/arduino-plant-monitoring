@@ -79,6 +79,10 @@ net.connect( options, function () {
         freq: 250
       });
 
+      const floatSwitch = new five.Sensor({
+        pin: 'A1'
+      });
+
       // Sensor definition
       sensors.push( SensorFactory.Sensor({
         type  : 'temp',
@@ -102,6 +106,14 @@ net.connect( options, function () {
         unit  : '%',
         sensor: lightSensor,
         color : '#90ee7e'
+      }) );
+
+      sensors.push( SensorFactory.Sensor({
+        type  : 'floatSwitch',
+        label : 'Float Switch',
+        unit  : '',
+        sensor: floatSwitch,
+        color : ''
       }) );
 
       io.on( 'connection', ( socket ) => {

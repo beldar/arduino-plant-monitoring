@@ -7,6 +7,7 @@ module.exports = {
   TEMP_MAX_LIMIT    : 30, // Max temperature limit to send an Alert
   HUMIDITY_MIN_LIMIT: 40, // Min humidity limit to send an Alert
   HUMIDITY_MAX_LIMIT: 70, // Max humidity limit to send an Alert
+  FLOAT_ALERT_VALUE : false, // Value of float switch to send an Alert
   SEND_EMAILS       : false, // Set to true if you want email Alerts to be sent
   EMAIL_FREQ        : 60 * 1000, // (1min) How often to check the limits for the Alerts
   EMAIL_SERVICE     : 'gmail', // Which email service to use
