@@ -30,7 +30,9 @@ const io = require( 'socket.io' )( httpServer );
 
 httpServer.listen( config.PORT );
 
-const sensors = [];
+const sensors = [],
+      RECORD_PH = 'record.ph',
+      LOG_ENTRY = 'log.entry';
 
 // set options to match Firmata config for wifi
 // using MKR1000 with WiFi101
@@ -39,103 +41,105 @@ const options = {
   port: config.ARDUINO_PORT
 };
 
-net.connect( options, function () {
-  console.log( '📡  Connected to MKR1000! 📡' );
+DB.init();
 
-  const socketClient = this;
-
-  // use the socketClient instead of a serial port for transport
-  const boardIo = new firmata.Board( socketClient );
-
-  boardIo.once( 'ready', () => {
-    console.log( '🔌  Connection board wired 🔌' );
-
-    boardIo.isReady = true;
-
-    const board = new five.Board({ io: boardIo, repl: config.REPL });
-    board.on( 'ready', () => {
-      console.log( '⚡  Board is ready  ⚡' );
-
-      // Init RethinkDB stuff
-      DB.init();
-
-      // Sensor initialisation
-      const multi = new five.Multi({
-        controller: 'BME280',
-        address   : 0x76,
-        freq      : 250
-      });
-
-      // const lightSensor = new five.Light({
-      //   pin : 'A0',
-      //   freq: 250
-      // });
-      //
-      // const floatSwitch = new five.Sensor({
-      //   pin: 'A1'
-      // });
-
-      // Sensor definition
-      sensors.push( SensorFactory.Sensor({
-        type  : 'temp',
-        label : 'Temperature',
-        unit  : 'ºC',
-        sensor: multi,
-        color : '#2b908f'
-      }) );
-
-      sensors.push( SensorFactory.Sensor({
-        type  : 'humidity',
-        label : 'Humidity',
-        unit  : '%',
-        sensor: multi,
-        color : '#f45b5b'
-      }) );
-
-      // sensors.push( SensorFactory.Sensor({
-      //   type  : 'light',
-      //   label : 'Light Exposure',
-      //   unit  : '%',
-      //   sensor: lightSensor,
-      //   color : '#90ee7e'
-      // }) );
-      //
-      // sensors.push( SensorFactory.Sensor({
-      //   type  : 'floatSwitch',
-      //   label : 'Float Switch',
-      //   unit  : '',
-      //   sensor: floatSwitch,
-      //   color : ''
-      // }) );
-
-      io.on( 'connection', ( socket ) => {
-        // emit usersCount on new connection
-        ws.emitUsersCount( io );
-        // emit chart data to have initial values
-        ws.emitChartData( io, sensors );
-
-        // emit usersCount when connection is closed
-        socket.on( 'disconnect', () => ws.emitUsersCount( io ) );
-      });
-
-      setInterval( () => {
-        // emit chart data on each measurement
-        ws.emitChartData( io, sensors );
-        // save measurement to rethinkdb on each measurement
-        DB.saveMeasurements( sensors );
-        // parse readings for email alerts on each interval
-        Alerts.parseReading( sensors );
-      }, config.MEASUREMENT_FREQ );
-
-      if ( config.NGROK_ENABLED ) {
-        ngrok.connect( config.PORT, ( err, url ) => {
-          if ( err ) return console.error( '📛 ngrok tunnel failed', err );
-          console.log( '⚡  ngrok tunnel established! ⚡', url );
-        });
-      }
-    });
-  });
-});
+// net.connect( options, function () {
+//   console.log( '📡  Connected to MKR1000! 📡' );
+//
+//   const socketClient = this;
+//
+//   // use the socketClient instead of a serial port for transport
+//   const boardIo = new firmata.Board( socketClient );
+//
+//   boardIo.once( 'ready', () => {
+//     console.log( '🔌  Connection board wired 🔌' );
+//
+//     boardIo.isReady = true;
+//
+//     const board = new five.Board({ io: boardIo, repl: config.REPL });
+//     board.on( 'ready', () => {
+//       console.log( '⚡  Board is ready  ⚡' );
+//
+//       // Init RethinkDB stuff
+//       DB.init();
+//
+//       // Sensor initialisation
+//       const multi = new five.Multi({
+//         controller: 'BME280',
+//         address   : 0x76,
+//         freq      : 250
+//       });
+//
+//       // const lightSensor = new five.Light({
+//       //   pin : 'A0',
+//       //   freq: 250
+//       // });
+//       //
+//       // const floatSwitch = new five.Sensor({
+//       //   pin: 'A1'
+//       // });
+//
+//       // Sensor definition
+//       sensors.push( SensorFactory.Sensor({
+//         type  : 'temp',
+//         label : 'Temperature',
+//         unit  : 'ºC',
+//         sensor: multi,
+//         color : '#2b908f'
+//       }) );
+//
+//       sensors.push( SensorFactory.Sensor({
+//         type  : 'humidity',
+//         label : 'Humidity',
+//         unit  : '%',
+//         sensor: multi,
+//         color : '#f45b5b'
+//       }) );
+//
+//       // sensors.push( SensorFactory.Sensor({
+//       //   type  : 'light',
+//       //   label : 'Light Exposure',
+//       //   unit  : '%',
+//       //   sensor: lightSensor,
+//       //   color : '#90ee7e'
+//       // }) );
+//       //
+//       // sensors.push( SensorFactory.Sensor({
+//       //   type  : 'floatSwitch',
+//       //   label : 'Float Switch',
+//       //   unit  : '',
+//       //   sensor: floatSwitch,
+//       //   color : ''
+//       // }) );
+//
+//       io.on( 'connection', ( socket ) => {
+//         // emit usersCount on new connection
+//         ws.emitUsersCount( io );
+//         // emit chart data to have initial values
+//         ws.emitChartData( io, sensors );
+//
+//         // emit usersCount when connection is closed
+//         socket.on( 'disconnect', () => ws.emitUsersCount( io ) );
+//       });
+//
+//       setInterval( () => {
+//         // emit chart data on each measurement
+//         ws.emitChartData( io, sensors );
+//         // save measurement to rethinkdb on each measurement
+//         DB.saveMeasurements( sensors );
+//         // parse readings for email alerts on each interval
+//         Alerts.parseReading( sensors );
+//       }, config.MEASUREMENT_FREQ );
+//
+//       if ( config.NGROK_ENABLED ) {
+//         ngrok.connect( config.PORT, ( err, url ) => {
+//           if ( err ) return console.error( '📛 ngrok tunnel failed', err );
+//           console.log( '⚡  ngrok tunnel established! ⚡', url );
+//         });
+//       }
+//     });
+//   });
+// });
 
 // setting app stuff
 app.locals.title = 'Plant monitor';
@@ -187,4 +191,27 @@ app.get( '/api/:sensor', ( req, res ) => {
     res.write( JSON.stringify( err || measurements ) );
     res.end();
   });
+});
+
+//Google actions Webhook
+app.post( '/webhook', ( req, res ) => {
+  console.log(req.body);
+  const result = req.body.result || false;
+
+  if ( result ) {
+    const { action, resolvedQuery, parameters } = result;
+
+    switch( action ) {
+      case RECORD_PH:
+        if ( parameters.ph && parameters.ph.length ) {
+          DB.savePH( parameters.ph )
+        }
+        break;
+      case LOG_ENTRY:
+        if ( parameters.entry && parameters.entry.length ) {
+          DB.saveEntry( parameters.entry )
+        }
+        break;
+    }
+  }
 });
