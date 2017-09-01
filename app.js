@@ -32,14 +32,6 @@ httpServer.listen( config.PORT );
 
 const sensors = [];
 
-const pulseLed = ( led, duration, cb ) => {
-  led.blink();
-  setTimeout( () => {
-    led.stop().off();
-    if ( cb ) cb();
-  }, duration );
-};
-
 // set options to match Firmata config for wifi
 // using MKR1000 with WiFi101
 const options = {
@@ -74,14 +66,14 @@ net.connect( options, function () {
         freq      : 250
       });
 
-      const lightSensor = new five.Light({
-        pin : 'A0',
-        freq: 250
-      });
-
-      const floatSwitch = new five.Sensor({
-        pin: 'A1'
-      });
+      // const lightSensor = new five.Light({
+      //   pin : 'A0',
+      //   freq: 250
+      // });
+      //
+      // const floatSwitch = new five.Sensor({
+      //   pin: 'A1'
+      // });
 
       // Sensor definition
       sensors.push( SensorFactory.Sensor({
@@ -100,21 +92,21 @@ net.connect( options, function () {
         color : '#f45b5b'
       }) );
 
-      sensors.push( SensorFactory.Sensor({
-        type  : 'light',
-        label : 'Light Exposure',
-        unit  : '%',
-        sensor: lightSensor,
-        color : '#90ee7e'
-      }) );
-
-      sensors.push( SensorFactory.Sensor({
-        type  : 'floatSwitch',
-        label : 'Float Switch',
-        unit  : '',
-        sensor: floatSwitch,
-        color : ''
-      }) );
+      // sensors.push( SensorFactory.Sensor({
+      //   type  : 'light',
+      //   label : 'Light Exposure',
+      //   unit  : '%',
+      //   sensor: lightSensor,
+      //   color : '#90ee7e'
+      // }) );
+      //
+      // sensors.push( SensorFactory.Sensor({
+      //   type  : 'floatSwitch',
+      //   label : 'Float Switch',
+      //   unit  : '',
+      //   sensor: floatSwitch,
+      //   color : ''
+      // }) );
 
       io.on( 'connection', ( socket ) => {
         // emit usersCount on new connection
