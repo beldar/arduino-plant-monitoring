@@ -11,7 +11,8 @@ $( document ).ready( () => {
         $users = $( '.users' ),
         $temperatureLimits = $( '#temperature-limits.sensor-values div.temperature' ),
         $lightLimits = $( '#light-limits.sensor-values div.light' ),
-        $humidityLimits = $( '#humidity-limits.sensor-values div.humidity' );
+        $humidityLimits = $( '#humidity-limits.sensor-values div.humidity' ),
+        $waterLevel = $( '#water-level.sensor-values div.water' );
 
   const tempData = [],
         lightData = [],
@@ -22,12 +23,15 @@ $( document ).ready( () => {
         MAX_INITIAL_POINTS = 100,
         initialIndex = measurements.length - MAX_INITIAL_POINTS > 0 ? measurements.length - MAX_INITIAL_POINTS : 0;
 
+  let waterLevel = false;
+
   measurements
   .forEach( ( p, i ) => {
     const temp = Number( p.temp );
     const light = p.light;
     const humidity = p.humidity;
     const date = new Date( p.date ).getTime();
+    waterLevel = p.floatSwitch;
 
     if ( temp < tempLimits.min ) tempLimits.min = temp;
     if ( temp > tempLimits.max ) tempLimits.max = temp;
@@ -75,7 +79,13 @@ $( document ).ready( () => {
     $humidityLimits.html( `${humidityLimits.min}<span>%</span>/${humidityLimits.max}<span>%</span>` );
   }
 
-  function updateSensorDisplayValues( temp, light, humidity ) {
+  function updateWaterLevel( lvl ) {
+    waterLevel = lvl;
+    const display = waterLevel ? '👎' : '👍';
+    $waterLevel.html( display );
+  }
+
+  function updateSensorDisplayValues( temp, light, humidity, water ) {
     if ( temp ) {
       updateTemperature( temp.value );
       updateTempLimits( temp.value );
@@ -88,6 +98,9 @@ $( document ).ready( () => {
       updateHumidity( humidity.value );
       updateHumidityLimits( humidity.value );
     }
+    if ( water !== waterLevel ) {
+      updateWaterLevel( water.value );
+    }
   }
 
   const socket = io.connect();
@@ -97,12 +110,13 @@ $( document ).ready( () => {
     const temp = readings.value.find( v => v.type === 'temp' );
     const light = readings.value.find( v => v.type === 'light' );
     const humidity = readings.value.find( v => v.type === 'humidity' );
+    const water = readings.value.find( v => v.type === 'floatSwitch' );
 
     if ( temp ) _series1.addPoint( [ readings.date, Number( temp.value ) ], false, true );
     if ( light ) _series2.addPoint( [ readings.date, light.value ], false, true );
     if ( humidity ) _series3.addPoint( [ readings.date, humidity.value ], true, true );
 
-    updateSensorDisplayValues( temp, light, humidity );
+    updateSensorDisplayValues( temp, light, humidity, water );
   });
 
   socket.on( 'usersCount', ( total ) => {
