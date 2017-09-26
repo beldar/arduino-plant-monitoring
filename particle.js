@@ -13,7 +13,6 @@ const cookieParser = require( 'cookie-parser' );
 const bodyParser = require( 'body-parser' );
 const net = require( 'net' );
 const five = require( 'johnny-five' );
-const firmata = require( 'firmata' );
 const ngrok = require( 'ngrok' );
 
 const DB = require( './lib/DB' );
@@ -41,13 +40,7 @@ const board = new five.Board({
   })
 });
 
-
-board.on( 'ready', () => {
-  console.log( '⚡  Board is ready  ⚡' );
-
-  // Init RethinkDB stuff
-  DB.init();
-
+const setSensors = function () {
   // Sensor initialisation
   const multi = new five.Multi({
     controller: 'BME280',
@@ -98,21 +91,21 @@ board.on( 'ready', () => {
   }) );
 
   io.on( 'connection', ( socket ) => {
-    // emit usersCount on new connection
+  // emit usersCount on new connection
     ws.emitUsersCount( io );
-    // emit chart data to have initial values
+  // emit chart data to have initial values
     ws.emitChartData( io, sensors );
 
-    // emit usersCount when connection is closed
+  // emit usersCount when connection is closed
     socket.on( 'disconnect', () => ws.emitUsersCount( io ) );
   });
 
   setInterval( () => {
-    // emit chart data on each measurement
+  // emit chart data on each measurement
     ws.emitChartData( io, sensors );
-    // save measurement to rethinkdb on each measurement
+  // save measurement to rethinkdb on each measurement
     DB.saveMeasurements( sensors );
-    // parse readings for email alerts on each interval
+  // parse readings for email alerts on each interval
     Alerts.parseReading( sensors );
   }, config.MEASUREMENT_FREQ );
 
@@ -122,6 +115,27 @@ board.on( 'ready', () => {
       console.log( '⚡  ngrok tunnel established! ⚡', url );
     });
   }
+};
+
+const safelySetSensors = function () {
+  try {
+    setSensors();
+  } catch ( e ) {
+    console.error( 'Error while trying to init sensors', e );
+    setTimeout( () => {
+      console.log( 'Trying again...' );
+      safelySetSensors();
+    }, 2000 );
+  }
+};
+
+board.on( 'ready', () => {
+  console.log( '⚡  Board is ready  ⚡' );
+
+  // Init RethinkDB stuff
+  DB.init();
+
+  safelySetSensors();
 });
 
 // setting app stuff
