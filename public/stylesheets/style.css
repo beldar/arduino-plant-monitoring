@@ -112,18 +112,23 @@ div#master-container {
   margin: 0; }
 
 @media (max-width: 764px) {
-  div#about h1 {
-    display: none; }
+  div#about {
+    flex: 1; }
+    div#about h1 {
+      display: none; }
   div#sensorValues {
-    flex-direction: column;
+    flex: 1;
+    flex-direction: row;
     font-size: .8em;
     align-items: center; }
     div#sensorValues div.sensor-values {
-      flex-direction: row;
-      align-items: flex-end; }
+      flex-direction: column;
+      align-items: center; }
       div#sensorValues div.sensor-values label {
         margin-left: 10px;
-        margin-bottom: 10px; } }
+        margin-bottom: 10px; }
+  div#sensorData {
+    flex: 2; } }
 
 @media (max-height: 600px) {
   div#about h1 {
