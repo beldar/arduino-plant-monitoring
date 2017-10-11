@@ -45,7 +45,8 @@ const setSensors = function () {
   const multi = new five.Multi({
     controller: 'BME280',
     address   : 0x76,
-    freq      : 250
+    freq      : 250,
+    delay     : 1000
   });
 
   const lightSensor = new five.Light({
