@@ -213,3 +213,7 @@ app.post( '/webhook', ( req, res ) => {
     }
   }
 });
+
+app.get( '/restart', ( req, res ) => {
+  process.exit();
+});

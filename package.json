@@ -3,6 +3,7 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
+    "start:pm2": "pm2 start particle.js --restart-delay 5000",
     "start": "node app.js",
     "build:css": "node-sass public/stylesheets/*.scss --output public/stylesheets",
     "eslint": "eslint --fix --ext .jsx --ext .js app.js ./lib ./public/javascripts/chart.js"
