@@ -54,9 +54,9 @@ const setSensors = function () {
     freq: 250
   });
 
-  const floatSwitch = new five.Sensor({
-    pin: 'A1'
-  });
+  // const floatSwitch = new five.Sensor({
+  //   pin: 'A1'
+  // });
 
   // Sensor definition
   sensors.push( SensorFactory.Sensor({
@@ -83,13 +83,13 @@ const setSensors = function () {
     color : '#90ee7e'
   }) );
 
-  sensors.push( SensorFactory.Sensor({
-    type  : 'floatSwitch',
-    label : 'Float Switch',
-    unit  : '',
-    sensor: floatSwitch,
-    color : ''
-  }) );
+  // sensors.push( SensorFactory.Sensor({
+  //   type  : 'floatSwitch',
+  //   label : 'Float Switch',
+  //   unit  : '',
+  //   sensor: floatSwitch,
+  //   color : ''
+  // }) );
 
   io.on( 'connection', ( socket ) => {
   // emit usersCount on new connection
