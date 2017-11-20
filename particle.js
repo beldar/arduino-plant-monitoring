@@ -46,7 +46,7 @@ const setSensors = function () {
     controller: 'BME280',
     address   : 0x76,
     freq      : 250,
-    delay     : 1000
+    delay     : 250
   });
 
   const lightSensor = new five.Light({

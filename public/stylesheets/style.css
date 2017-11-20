@@ -127,6 +127,8 @@ div#master-container {
       div#sensorValues div.sensor-values label {
         margin-left: 10px;
         margin-bottom: 10px; }
+      div#sensorValues div.sensor-values div {
+        font-size: 3em; }
   div#sensorData {
     flex: 2; } }
 
